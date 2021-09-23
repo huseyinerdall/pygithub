@@ -26,3 +26,19 @@ venv/
 ENV/ 
 env.bak/ 
 venv.bak/ 
+
+#secret
+secret.json
+
+#frontend
+.DS_Store
+node_modules/
+/dist/
+
+# local env files
+.env.local
+.env.*.local
+.env
+
+#webstorm
+.idea/
