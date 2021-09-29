@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
 
 Vue.use(VueRouter)
 
@@ -8,7 +7,12 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: () => import('../views/Home')
+  },
+  {
+    path: '/auth',
+    name: 'Auth',
+    component: () => import('../views/Auth')
   },
   {
     path: '/about',
@@ -24,13 +28,26 @@ const routes = [
     path: '/search/:username',
     name: 'SearchResult',
     component: () => import('../views/SearchResult.vue')
+  },
+  {
+    path: '/logout',
+    name: 'Logout',
+    component: () => import('../views/Logout.vue')
   }
 ]
+
+
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.name !== 'Auth' && !localStorage.getItem('token')) next({ name: 'Auth' })
+  // if the user is not authenticated, `next` is called twice
+  next()
 })
 
 export default router

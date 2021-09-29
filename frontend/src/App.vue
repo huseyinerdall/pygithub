@@ -1,10 +1,11 @@
 <template>
-  <div id="app">
-    <v-app-bar class="d-flex align-center">
+  <v-app id="app">
+    <v-app-bar class="align-center" fixed>
+      
       <div id="nav">
-        <router-link to="/">Home</router-link> |
-        <router-link to="/about">About</router-link>
+        <router-link to="/">Home</router-link>
       </div>
+      <v-spacer></v-spacer>
       <div>
         <v-text-field solo dense hide-details v-model="username">
           <template v-slot:label>
@@ -15,10 +16,16 @@
           </template>
         </v-text-field>
       </div>
-      <router-link :to="'/search/'+username" tag="button">ARA</router-link>
+      <v-btn :href="'/search/'+username">ARA</v-btn>
+      <v-spacer></v-spacer>
+      <v-btn @click="logout">Logout</v-btn>
     </v-app-bar>
-    <router-view/>
-  </div>
+    <v-container class="mt-8">
+      <router-view/>
+    </v-container>
+    <notifications group="error" position='top center' width=400 />
+    <notifications group="success" position='top center' width=400 />
+  </v-app>
 </template>
 <script>
 export default {
@@ -36,6 +43,9 @@ export default {
     searchUser() {
       if (this.username == '') return undefined
       this.$router.push({ name: 'SearchResult', params: { username: this.username } })
+    },
+    logout() {
+      this.$router.push({name:'Logout'})
     }
   }
 }
