@@ -269,7 +269,7 @@ export default {
     deleteRepo(reponame){
       axios.post(`http://localhost:8000/api/actions/`,{
         reponame: reponame,
-        _method : 'DELETE'
+        _method : 'DELETEREPO'
       })
       .then((res)=>{
         console.log(res)

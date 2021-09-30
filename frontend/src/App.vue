@@ -7,7 +7,7 @@
       </div>
       <v-spacer></v-spacer>
       <div>
-        <v-text-field solo dense hide-details v-model="username">
+        <v-text-field solo dense hide-details v-model="username" @keyup.enter="search">
           <template v-slot:label>
             Kullanıcı Adı
             <v-icon>
@@ -16,7 +16,7 @@
           </template>
         </v-text-field>
       </div>
-      <v-btn :href="'/search/'+username">ARA</v-btn>
+      <v-btn :href="'/search/'+username" ref="searchBtn">ARA</v-btn>
       <v-spacer></v-spacer>
       <v-btn @click="logout">Logout</v-btn>
     </v-app-bar>
@@ -46,6 +46,9 @@ export default {
     },
     logout() {
       this.$router.push({name:'Logout'})
+    },
+    search() {
+      this.$refs.searchBtn.click()
     }
   }
 }

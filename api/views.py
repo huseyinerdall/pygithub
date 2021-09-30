@@ -44,12 +44,13 @@ class GitAuth(APIView):
     def post(self,request):
         global username
         token = request.data['token']
+        print(token)
         self.headers = {'Authorization': 'token ' + token}
         result = requests.get('https://api.github.com/user', headers=self.headers).json()
+        print(result)
         if result['login']:
             temp = {
-                "GITHUB_ACCESS_TOKEN": token,
-                "GITHUB_USERNAME": result['login']
+                "GITHUB_ACCESS_TOKEN": token
             }
             with open(BASE_DIR / '.secret', 'w') as f:
                 json.dump(temp, f)
@@ -121,17 +122,17 @@ class GitRepoActions(APIView):
             self.secret = json.loads(f.read())
         self.headers = GitAuth.get_headers()
 
-        if request.data['_method'] == 'DELETE':
+        if request.data['_method'] == 'DELETEREPO':
             repo = request.data['reponame']
             if repo == '':
                 print('Error')
                 return Response('Repo bulunamadı!')
             print(GitAuth.get_headers())
-            print('https://api.github.com/' + 'repos/' + username + '/' + repo)
             result = requests.delete('https://api.github.com/' + 'repos/' + 'huseyinerdall' + '/' + repo, headers=GitAuth.get_headers()).text
             print(result)
             return Response(result)
-        elif request.data['_method'] == 'POST':
+        elif request.data['_method'] == 'EDITFILE':
+            print(self.headers,username)
             content = request.data['content']
             message = request.data['message']
             sha = request.data['sha']
@@ -147,6 +148,23 @@ class GitRepoActions(APIView):
                 "sha": sha
             }
             result = requests.put(f"https://api.github.com/repos/huseyinerdall/{repo_name}/contents/{urllib.parse.quote(path)}",headers=self.headers,data=json.dumps(payload)).json()
+            return Response(result)
+
+        elif request.data['_method'] == 'DELETEFILE':
+            content = request.data['content']
+            message = request.data['message']
+            sha = request.data['sha']
+            path = request.data['path']
+            repo_name = request.data['repo_name']
+            if not isinstance(content, bytes):
+                content = content.encode("utf-8")
+            content = b64encode(content).decode("utf-8")
+
+            payload = {
+                "message": 'DELETE VIA GITHUB ENTEGRATOR',
+                "sha": sha
+            }
+            result = requests.delete(f"https://api.github.com/repos/huseyinerdall/{repo_name}/contents/{urllib.parse.quote(path)}",headers=self.headers,data=json.dumps(payload)).json()
             return Response(result)
 
     def delete_file(

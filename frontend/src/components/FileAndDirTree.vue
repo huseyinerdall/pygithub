@@ -36,8 +36,8 @@
       </v-card>
     </v-col>
     <v-col cols="9" class="pa-2 pt-10 text-left">
-      <v-btn @click="editFile">Update File</v-btn>
-      <v-btn @click="deleteFile">Delete File</v-btn>
+      <v-btn @click="editFile" :loading="updating">Update File</v-btn>
+      <v-btn @click="deleteFile" :loading="deleting">Delete File</v-btn>
       <v-textarea
           v-model="code"
           :value="code"
@@ -62,6 +62,8 @@ import base64toutf8 from  '../functions/base64toutf8'
 export default {
   data: () => ({
     initiallyOpen: ['public'],
+    updating: false,
+    deleting: false,
     options: {
       selectOnLineNumbers: false
     },
@@ -143,7 +145,14 @@ export default {
             }
             item.children.push(...json)
           })
-          .catch(err => console.warn(err))
+          .catch(err => {
+            this.$notify({
+              group: 'error',
+              title: 'Error',
+              text: err.message,
+              type: 'error'
+            });
+          })
     },
     getRepo() {
       axios.get(`https://api.github.com/repos/huseyinerdall/${this.repo}/contents`,{ params: { t: new Date().getTime() }})
@@ -158,13 +167,14 @@ export default {
           })
     },
     editFile(){
+      this.updating = true
       let post_parameters = {
         path: this.selected.path,
         sha: this.items[this.currentIndex].sha,
         content: this.code,
         message: 'message',
         repo_name: this.$route.params.reponame,
-        _method: 'POST'
+        _method: 'EDITFILE'
       }
       postData(`http://localhost:8000/api/actions/`,post_parameters)
       .then((res)=>{
@@ -177,23 +187,54 @@ export default {
             text: 'Dosyanız kaydedildi',
             type: 'success'
           });
+          this.updating = false
+        } else {
+          this.$notify({
+            group: 'error',
+            title: 'Error',
+            text: 'Bir hata oluştu',
+            type: 'error'
+          });
+          this.updating = false
         }
-        console.log(res);
         /*delete this.items[this.currentIndex]
         this.items[this.currentIndex] = res.content*/
       })
     },
     deleteFile(){
+      this.deleting = true
+      const app = this
       let post_parameters = {
         path: this.selected.path,
         sha: this.items[this.currentIndex].sha,
+        content: this.code,
         message: 'message',
-        repo_name: this.$router.params.reponame
+        repo_name: this.$route.params.reponame,
+        _method: 'DELETEFILE'
       }
       postData(`http://localhost:8000/api/actions/`,post_parameters)
       .then((res)=>{
         this.getRepo()
         this.selected = res.content
+        if(res.commit){
+          this.$notify({
+            group: 'success',
+            title: 'Başarılı',
+            text: 'Dosyanız silindi',
+            type: 'success'
+          });
+          this.deleting = false
+          setTimeout(()=>{app.$router.go()},500)
+        } else {
+          
+          this.$notify({
+            group: 'error',
+            title: 'Error',
+            text: 'Bir hata oluştu',
+            type: 'error'
+          });
+          this.deleting = false
+        }
         /*delete this.items[this.currentIndex]
         this.items[this.currentIndex] = res.content*/
       })
